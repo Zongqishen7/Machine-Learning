@@ -1,0 +1,137 @@
+2
+    2.2  特征工程介绍
+        2.2.1 为什么需要特征工程(Feature Engineering)
+        2.2.2 什么是特征工程
+            sklearn 特征工程
+            pandas数据清洗、数据处理
+                特征抽取/特征提取
+                    机器学习算法 - 统计方法 - 数学公式
+                        文本类型 -》 数值
+                        类型    -〉 数值
+    2.3 
+        2.3.1 
+        2.3.2 Dicvectorizer对使用字典储存的数据进行特征提取与向量化
+            sklearn.feature_extraction.DictVectoeizer(sparse = True)
+            对名义型变量 采用0/1编码,进行向量化；而数值型变量，维持原始值字典特征提取 - 类别 - one-hot编码
+            vector 数学：向量 物理：矢量
+                矩阵 matrix 二维数组
+                向量 verctor 一维数组
+            父类：转换器类
+            返回稀疏矩阵： 稀疏矩阵的含义为（将非零值按位置表示出来；目的节省内存提高加载效率）
+            应用场景：
+                1):pclass, sex 数据集中类别特征比较多
+                    1. 将数据集的特征 -》 字典类型
+                    2. DictVectorizer转换
+                2):本身拿到的数据就是字典类型
+
+        2.3.3 文本特征提取
+            API 对文本数据进行特征值化
+                sklearn.feature_extraction.text.CountVectorizer(stop_words=[])
+
+                返回词频矩阵
+                CountVectorizer.fit_transform(X) X:文本或者包含文本字符串的可迭代对象 返回值：返回sparse矩阵
+                CountVectorizer.inverse_transform(X) X:array数组或者sparse矩阵 返回值:转换之前数据格
+                CountVectorizer.get_feature_names() 返回值:单词列表
+                sklearn.feature_extraction.text.TfidfVectorizer
+
+
+            sklearn.feature_extraction.text.CountVectorizer(stop_words=[])
+            方法一: countvectorizer
+                    是通过fit-transform函数将文本中的词语转换为词频矩阵，矩阵元素a[i][j] 表示j词在第i个文本下的词频。即各个词语出现的次数，
+                    通过get_feature_names()可以看到所有文本的关键词, 通过torray()可看到词频矩阵的结果
+            关键词: 在一个类别的文章中，出现的次数很多, 但是在其他列别德文章中出现很少
+            方法二: TfidfVectorizer
+                TF-IDF - 重要程度
+                两个词 "经济" "非常"
+                1000篇文章 - 语料库
+                100篇文章 - "非常"
+                10篇文章 - "经济"
+                现在挑选两篇文章
+                文章A(100词): 10次"经济" TF_IDF:0.2
+                    tf: 10/100 = 0.1
+                    idf： lg 1000/10 = 2
+                文章B(100词): 10次"非常"TF-IDF:0.1
+                    tf: 10/100 = 0.1
+                    idf: log10(1000/100) = 1
+                由此可以看出 经济在所有语料库中更加重要
+    2.4
+        特征预处理
+        2.4.1 什么是特征预处理
+            无量纲化: 归一化&标准化
+            归一化API：
+                sklearn.preprocessing.MinMaxScaler (feature_range=(0,1)… )
+                    MinMaxScalar.fit_transform(X)
+                        X:numpy array格式的数据[n_samples,n_features]
+                    返回值：转换后的形状相同的array
+            标准化API：
+                sklearn.preprocessing.StandardScaler( )
+                    处理之后每列来说所有数据都聚集在均值0附近标准差差为1
+                    StandardScaler.fit_transform(X)
+                        X:numpy array格式的数据[n_samples,n_features]
+                    返回值：转换后的形状相同的array
+
+        2.4.2 归一化 (稳定性较差)
+             特征的单位或者大小相差较大，或者某特征的方差相比其他的特征要大出几个数量级，容易影响（支配）目标结果，使得一些算法无法学习到其它的特征
+             但遇到异常值: 最大值、最小值稳定性差 (data - min(data)) / (max(data) - min(data))
+        2.4.3 标准化 (稳定)
+             (x - mean) / std
+             标准差：集中程度
+             应用场景：在已经有样本足够多的情况下比较稳定，适合现代嘈杂大数据场景
+    2.5
+        2.5.1 API： 
+            低方差特征过滤API：
+                sklearn.feature_selection.VarianceThreshold(threshold = 0.0)
+                    删除所有低方差特征
+                        Variance.fit_transform(X)
+                        X:numpy array格式的数据[n_samples,n_features]
+                        返回值：训练集差异低于threshold的特征将被删除。默认值是保留所有非零方差特征，即删除所有样本中具有相同值的特征。
+            相关系数API：
+                from scipy.stats import pearsonr
+                    x : (N,) array_like
+                    y : (N,) array_like Returns: (Pearson’s correlation coefficient, p-value)
+
+        2.5.1 降维
+            维数：嵌套的层数 0维： 标量 1维： 向量 2维： 矩阵；
+		    但我们降维是对二维数组进行处理，降维就是降低特征的个数(降低列数)」
+            特征选择
+                Filter过滤式
+                    方差选择法：低方差特征过滤
+                    相关系数 - 特征与特征之间的相关程度：
+                       取值范围: -1 <- r <- +1
+                       皮尔逊相关系数: 0.9942
+                       特征与特征之间相关性很高:
+                            1)选取其中一个
+                            2)加权求和
+                            3)主成分分析(PCA)
+                Embeded嵌入式
+                    决策树：第二天
+                    正则化：第三天
+                    深度学习：第五天
+            主成分分析：
+            旨在从原有特征中找出主要特征
+    2.6
+        2.6.1 PCA API:
+            sklearn.decomposition.PCA(n_components=None)
+                将数据分解为较低维数空间
+                n_components:
+                    小数：表示保留百分之多少的信息
+                    整数：减少到多少特征
+                PCA.fit_transform(X) X:numpy array格式的数据[n_samples,n_features]
+                返回值：转换后指定维度的array
+
+        2.6.1 什么是主成分分析(PCA)
+            定义：高维数据转化为低维数据的过程，在此过程中可能会舍弃原有的数据、创造新的变量
+            作用：使数据压缩，尽可能降低愿数据的维数(复杂度), 损失少量信息
+            应用：回归分析活着聚类，找到一条合适的直线，通过一个矩阵运算得出主成分分析的结果
+            用法：sklearn.decomposition.PCA(n_components = None)
+            n_components：小数 表示保留百分比多少的信息 整数 减少到多少特征
+            
+        2.6.2 案例: 探究用户对物品分类的喜好戏份
+            用户:user_id     物品类别:aisle
+	    代码见Jupyter Notebook
+
+
+		
+
+
+
