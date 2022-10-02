@@ -1,0 +1,301 @@
+回归与聚类
+
+线性回归
+欠拟合与过拟合
+岭回归
+分类算法：逻辑回归
+无监督学习 k-means算法
+
+4
+    4.1 线性回归
+        回归问题：
+            目标值 - 连续型的数据
+        4.1.1 线性回归的原理
+            2.什么是线性回归(正规方程)
+                1)函数关系 特征值和目标值
+                    y = w1x1 + w2x2 + w3x3 + ---- + wnxn + b
+                    = wTx + b 
+                    数据挖掘基础
+                    y = 0.7 * 1 + 0.3 * 2
+                    期末成绩：0.7 * 考试成绩 + 0.3* 平时成绩
+                2)广义线性模型
+                    线性模型的定义：
+                        1)自变量是一次方: 是线性关系
+                        y = w1x1 + w2x2 +w3x3 + ...... + wnxn + b
+                        2)参数一次：是线性模型但不是线性关系
+                        y = w1x1 + w2x1^2 + w3x1^3 + w4x1^4 + .... + b
+                    线性关系一定是线性模型， 线性模型不一定是线性关系
+
+        4.1.2线性回归的算是和优化原理(理解记忆)
+            目标：求模型参数
+                模型参数能够使得预测准确
+            真实关系：真实关系：真实房子价格 = 0.02×中心区域的距离 + 0.04×城市一氧化氮浓度 + (-0.12×自住房平均房价) + 0.254×城镇犯罪率
+            随意假设：随机指定关系：预测房子价格 = 0.25×中心区域的距离 + 0.14×城市一氧化氮浓度 + 0.42×自住房平均房价 + 0.34×城镇犯罪率
+                损失函数/cost/成本函数/目标函数
+                优化损失
+                    优化方法？：
+                    正规方程：
+                        天才 - 直接求解(数据量小的时候)
+                    梯度下降：
+                        努力的普通人：试错、改进
+        4.1.3线性回归API
+        * sklearn.linear_model.LinearRegression(fit_intercept=True)
+            通过正规方程优化
+            fit_intercept：是否计算偏置
+            LinearRegression.coef_：回归系数
+            LinearRegression.intercept_：偏置
+
+        * sklearn.linear_model.SGDRegressor(loss="squared_loss", fit_intercept=True, learning_rate ='invscaling', eta0=0.01)
+            SGDRegressor类实现了随机梯度下降学习，它支持不同的loss函数和正则化惩罚项来拟合线性回归模型。
+            loss:损失类型
+                loss=”squared_loss”: 普通最小二乘法
+            fit_intercept：是否计算偏置
+            learning_rate : string, optional
+                学习率填充
+                'constant': eta = eta0
+                'optimal': eta = 1.0 / (alpha * (t + t0)) [default]
+                'invscaling': eta = eta0 / pow(t, power_t)
+                power_t=0.25:存在父类当中
+                对于一个常数值的学习率来说，可以使用learning_rate=’constant’ ，并使用eta0来指定学习率。
+            SGDRegressor.coef_：回归系数
+            SGDRegressor.intercept_：偏置
+        sklearn提供给我们两种实现的API， 可以根据选择使用
+
+        4.1.4 波士顿房价预测
+        流程：
+            1)获取数据集
+            2)划分数据集
+            3)特征工程:
+                无量纲化 - 标准化
+            4)预估器流程
+                fit() --> 模型
+                coef_ intercept_
+            5)模型评估
+        回归的性能评估：
+            梯度下降：需要选择学习率；   需要迭代求解； 特征数量较大可以使用             
+            正规方程：不需要选择学习率； 一次运算得出； 需要计算时间方程，时间复杂度高
+
+            *数据量多用梯度下降 *数据量小用LASSO或岭回归；SVR               
+            没有提到线性回归是因为线性回归不能解决拟合问题
+
+        4.1.5 梯度下降补充：
+            1. GD 梯度下降，原始的梯度下降法需要计算所有的样本的值才能够得出梯度，计算量大，所以后面才会有一系列改进
+            2. SGD 随机梯度下降是一个优化方法， 它在一次迭代时只考虑一个训练样本
+                SGD的优点是：
+                    高效
+                    容易实现
+                SGD的缺点是：
+                    SGD需要许多超参数： 比如正则项参数、迭代数
+                    SGD对于特征标准化是敏感的
+            3. SGA 随机平均梯度法：
+                SGA由于收敛速度太慢。sk-learn岭回归、逻辑回归等当中都会有SAG优化
+
+    4.2 什么是过拟合与欠拟合
+        训练集上表现的好，测试集上表现的不好 - 过拟合
+        4.2.1 
+            欠拟合
+                学习到的数据特征过少
+                解决：
+                    增加数据的特征数量
+            过拟合
+                原始特征过多，存在一些嘈杂特征，模型过于复杂是因为模型尝试去兼顾各种
+                解决：
+                    L1 正则化
+                        损失函数 + lamda 惩罚项
+                        作用：可以似的其中的一些W的值直接为0，删除这个特征的影响
+                        LASSO回归
+                    L2 正则化 更常用 
+                        损失函数 + lamda(惩罚系数) 惩罚项
+                        * 作用：可以使得其中的一些W的值都很小，都接近于0，削弱某个特征值的影响
+                        * 优点：越小的参数说明模型越简单，月简单的模型则不容易产生过拟合现象
+                        Ridge回归
+
+    4.3 线性回归的改进 - 岭回归
+        4.3.1 岭回归API：(课件)
+            sklearn.linear_model.Ridge(alpha=1.0, fit_intercept=True,solver="auto", normalize=False)
+                具有l2正则化的线性回归
+                alpha:正则化力度，也叫 λ (力度越大模型参数越小)
+                    λ取值：0~1 1~10
+                solver:会根据数据自动选择优化方法
+                    sag:如果数据集、特征都比较大，选择该随机梯度下降优化
+                normalize:数据是否进行标准化
+                    normalize=False:可以在fit之前调用preprocessing.StandardScaler标准化数据
+                Ridge.coef_:回归权重
+                Ridge.intercept_:回归偏置
+            
+            sklearn.linear_model.RidgeCV(_BaseRidgeCV, RegressorMixin)
+            Ridge方法相当于SGDRegressor(penalty='l2', loss="squared_loss"),只不过SGDRegressor实现了一个普通的随机梯度下降学习，推荐使用Ridge(实现了SAG)
+            具有l2正则化的线性回归，可以进行交叉验证
+            coef_:回归系数
+
+        4.3.2 带有L2正则化的线性回归 - 岭回归API(自己总结)
+            alpha 正则化力度 = 惩罚项系数
+            solver 会根据数据自动选择优化方法
+                sag：如果数据集、特征都比较大，则选择该随机梯度下降优化
+            normalize 默认为False  就是标准化
+            想看模型参数：
+                Ridge.coef_：回归权重
+                Ridge.intercept_：回归偏置  
+            
+    4.4 分类算法： 逻辑回归与二分类
+        3、逻辑回归API
+        sklearn.linear_model.LogisticRegression(solver='liblinear', penalty=‘l2’, C = 1.0)
+            solver:优化求解方式（默认开源的liblinear库实现，内部使用了坐标轴下降法来迭代优化损失函数）
+                sag：根据数据集自动选择，随机平均梯度下降
+            penalty：正则化的种类
+            C：正则化力度
+            LogisticRegression方法相当于 SGDClassifier(loss="log", penalty=" "),SGDClassifier实现了一个普通的随机梯度下降学习，也支持平均随机梯度下降法（ASGD），可以通过设置average=True。而使用LogisticRegression(实现了SAG)
+            
+        4.4.1 逻辑回归的应用场景
+            广告点击率
+            是否患病
+            是否为垃圾邮件
+            是否为金融诈骗
+            是否为虚假账号
+            正例 / 反例
+        4.4.2 逻辑回归的原理
+            1. 输入：线性回归的输出 就是 逻辑回归 的 输入
+            2. 激活函数： sigmoid函数
+                1 / (1 + e^(-x))
+            假设函数 / 线性函数
+                1 / (1 + e^(-(w1x1 + w2x2 + w3x3 + .... + wnxn + b)))
+            损失函数
+                (y_predict - y_true)平方和/总数
+                逻辑回归的真实值/预测值 是否属于某个类别
+                对数似然损失
+                log 2 * 
+            优化损失
+                梯度下降
+        4.4.4 案例：癌症分类预测-良 / 恶性乳腺癌肿瘤预测
+            流程分析：
+                1)获取数据
+                2)数据处理
+                    处理缺失值
+                3)划分数据集
+                4)特征工程:
+                    无量纲化处理 - 标准化
+                5)逻辑回归评估器
+                6)模型评估
+
+5. 分类评估的方法
+    5.1 精确率与召回率
+        5.1.1 混淆矩阵
+            TP = True Positive 
+            FN = False Negative
+        5.1.2 精确率(Precision) 与 召回率(Recall)
+            精确率
+            召回率 查得全不全
+        5.1.3 F1 Score 模型的稳健型
+
+    5.2 ROC曲线与AUC指标(样本不均衡用AUC指标)
+        5.2.1 知道TPR与FPR
+            TPR = TP/(TP/FN)
+            所有真实类别为1 的样本中，预测类别为1 的比例
+            FPR = FP/(FP+TN)
+            所有真实类别为0 的样本中，预测类别为1 的比例
+        5.2.2 AUC的概率意义是随机取一对正负样本，正样本得分大与负样本的概率
+            AUC的最小值为0.5， 最大值为1 去值越高越好
+
+6. sklearn模型的保存和加载API
+    from sklearn.externals import joblib
+        保存：joblib.dump(rf, 'test.pkl')
+        加载：estimator = joblib.load('test.pkl')
+
+
+7. 无监督学习-K-means算法
+    聚类:
+        K-means 
+    降维:
+        PCA
+        7.1、K-meansAPI
+            sklearn.cluster.KMeans(n_clusters=8,init=‘k-means++’)
+                k-means聚类
+                n_clusters:开始的聚类中心数量
+                init:初始化方法，默认为'k-means ++’
+                labels_:默认标记的类型，可以和真实值比较（不是值比较）
+
+        7.2 K-means聚类步骤
+            1、随机设置K个特征空间内的点作为初始的聚类中心
+            2、对于其他每个点计算到K个中心的距离，未知的点选择最近的一个聚类中心点作为标记类别
+            3、接着对着标记的聚类中心之后，重新计算出每个聚类的新中心点（平均值）
+            4、如果计算得出的新中心点与原中心点一样，那么结束，否则重新进行第二步过程
+        
+        7.3 案例：instacart market聚类
+            k = 3
+            流程分析：
+            降维后的数据
+                1)预估器流程
+                2)看结果
+                3)模型评估: 
+                    6.4 轮廓系数
+                        SCi = bi - ai / (max(bi,ai))
+                        b_i >> a_i 
+                        SC ~ b_i(i到其他族群的所有样本的距离最小值) /a_i(i到本身族群的距离平均值) 
+                        如果b_i>>a_i:趋近于1效果越好， b_i<<a_i:趋近于-1，效果不好。轮廓系数的值是介于 [-1,1] ，越趋近于1代表内聚度和分离度都相对较优。
+
+                        API 
+                        sklearn.metrics.silhouette_score(X, labels)
+                        计算所有样本的平均轮廓系数
+                        X：特征值
+                        labels：被聚类标记的目标值
+        7.4 K-means 总结
+        特点分析： 采用迭代式算法，直接易懂并且非常实用
+        缺点： 容易收敛到局部最优解(解决办法：多次聚类)
+            应用场景：
+            没有目标值
+            分类 
+
+
+
+
+
+                    
+            
+    
+
+        
+    
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+
+
+        
+
+
+
+
+    
+
+     
+
+
+
+
+                
+
+
+
+                    
+
+
+
+
